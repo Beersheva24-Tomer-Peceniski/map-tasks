@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.Random;
 
 public class MapTasks {
     public static void displayOccurrences(String[] strings) {
@@ -18,12 +19,13 @@ public class MapTasks {
         TreeMap<Long, TreeSet<String>> sortedOccurrencesMap = getSortedOccurrencesMap(occurrencesMap);
         displaySortedOoccurrencesMap(sortedOccurrencesMap);
     }
+
     public static void displayOccurrencesStream(String[] strings) {
         Arrays.stream(strings).collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
-        .entrySet().stream().sorted((e1, e2) -> {
-            int res = Long.compare(e2.getValue(), e1.getValue());
-            return res == 0 ? e1.getKey().compareTo(e2.getKey()) : res;
-        }).forEach(e -> System.out.printf("%s -> %d\n", e.getKey(), e.getValue()));
+                .entrySet().stream().sorted((e1, e2) -> {
+                    int res = Long.compare(e2.getValue(), e1.getValue());
+                    return res == 0 ? e1.getKey().compareTo(e2.getKey()) : res;
+                }).forEach(e -> System.out.printf("%s -> %d\n", e.getKey(), e.getValue()));
     }
 
     private static void displaySortedOoccurrencesMap(TreeMap<Long, TreeSet<String>> sortedOccurrencesMap) {
@@ -59,20 +61,40 @@ public class MapTasks {
 
     public static Map<Integer, Long> getDistributionByNumberOfDigits(int[][] array) {
 
-        return streamOfNumbers(array).collect(Collectors.groupingBy(n -> Integer.toString(n).length(), 
-        Collectors.counting()));
+        return streamOfNumbers(array).collect(Collectors.groupingBy(n -> Integer.toString(n).length(),
+                Collectors.counting()));
     }
-    public static void displayDigitsDistribution() {
-        //1_000_000 random numbers from 0 to Integer.MAX_VALUE created
-        //Output should contain all digits (0 - 9) with counters of occurrences
-        //sorted by descending order of occurrences
-        //example:
-        //1 -> <counter of occurrences>
-        //2 -> <counter of occurrences>
+
+        // 1_000_000 random numbers from 0 to Integer.MAX_VALUE created
+        // Output should contain all digits (0 - 9) with counters of occurrences
+        // sorted by descending order of occurrences
+        // example:
+        // 1 -> <counter of occurrences>
+        // 2 -> <counter of occurrences>
         // ..............
+    public static void displayDigitsDistribution() {
+        new Random().ints(1_000_000, 1, 30)
+            .boxed()
+            .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+            .entrySet()
+            .stream()
+            .filter(e -> isInRange(e.getKey(), 1, 9))
+            .sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue()))
+            .forEach(e -> System.out.printf("%d -> %d\n", e.getKey(), e.getValue()));
     }
+
+    private static boolean isInRange(int number, int minValue, int maxValue) {
+        return (number >= minValue) && (number <= maxValue);
+    }
+
     public static ParenthesesMaps getParenthesesMaps(Character[][] openCloseParentheses) {
-        //TODO
-        return null;
+        Map<Character, Character> openCloseMap = new HashMap<>();
+        Map<Character, Character> closeOpenMap = new HashMap<>();
+        Arrays.stream(openCloseParentheses).forEach(a -> {
+                openCloseMap.put(a[0], a[1]);
+                closeOpenMap.put(a[1], a[0]);
+            });
+
+        return new ParenthesesMaps(openCloseMap, closeOpenMap);
     }
 }
